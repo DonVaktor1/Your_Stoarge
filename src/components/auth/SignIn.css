@@ -1,0 +1,99 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    height: 100vh; /* Висота вікна браузера */
+    overflow: hidden; /* Сховати прокрутку */
+}
+
+.signin-background {
+    position: fixed; /* Фіксоване позиціонування */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden; /* Сховати переповнення */
+}
+
+.signin-background::before {
+    content: ""; /* Псевдоелемент для фону */
+    position: absolute; /* Абсолютне позиціонування */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../../assets/images/storage.jpg'); /* Шлях до вашого зображення */
+    background-size: cover; /* Зміна розміру зображення, щоб покрити весь фон */
+    background-position: center; /* Центрування зображення */
+    filter: blur(8px); /* Розмиття фонової фотографії */
+    z-index: -1; /* Накласти фоновий елемент під інші */
+}
+
+.signin-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Напівпрозорий фон для контейнера входу */
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 400px;
+    position: relative; /* Позиціонування контейнера */
+    z-index: 1; /* Зберігаємо контейнер на верхньому рівні */
+    margin: auto; /* Центрування контейнера */
+    top: 50%; /* Вертикальне центрування */
+    transform: translateY(-50%); /* Корекція для центрування */
+}
+
+.signin-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.signin-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.signin-input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+.signin-button {
+    padding: 10px;
+    background-color: #5a67d8; /* Синій фон */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.signin-button:hover {
+    background-color: #434190; /* Темніший синій при наведенні */
+}
+
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+.signup-prompt {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.signup-prompt a {
+    color: #5a67d8; /* Колір посилання */
+    text-decoration: none;
+}
+
+.signup-prompt a:hover {
+    text-decoration: underline; /* Підкреслення при наведенні */
+}
