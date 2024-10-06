@@ -1,9 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { onAuthStateChanged } from "firebase/auth"; // Додаємо Firebase перевірку стану авторизації
-import { auth } from "../../firebase"; // Імпорт firebase конфігурації
+import { onAuthStateChanged } from "firebase/auth"; 
+import { auth } from "../../firebase"; 
 
-// Створюємо контекст авторизації
+
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -12,11 +12,10 @@ export const AuthProvider = ({ children }) => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Використовуємо Firebase метод для перевірки стану авторизації
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
                 setCurrentUser(user);
-                localStorage.setItem('user', JSON.stringify(user)); // Зберігаємо користувача в localStorage
+                localStorage.setItem('user', JSON.stringify(user)); 
             } else {
                 setCurrentUser(null);
                 localStorage.removeItem('user');
@@ -24,16 +23,16 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         });
 
-        // Повертаємо функцію для очищення підписки на оновлення
+       
         return () => unsubscribe();
     }, []);
 
     const logout = () => {
-        // Очищення даних користувача та вихід з Firebase
+      
         auth.signOut();
         setCurrentUser(null);
         localStorage.removeItem('user');
-        navigate('/signin'); // Перенаправляємо на сторінку входу
+        navigate('/signin'); 
     };
 
     return (

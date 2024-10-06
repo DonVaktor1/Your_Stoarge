@@ -3,7 +3,7 @@ import React, { useContext, useState } from "react";
 import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from '../auth/AuthContext';
-import './SignUp.css'; // Додайте цей імпорт для стилів
+import './SignUp.css';
 
 const SignUp = () => {
     const { setCurrentUser } = useContext(AuthContext);
@@ -26,12 +26,12 @@ const SignUp = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             console.log(user);
-            setCurrentUser(user); // Оновлюємо поточного користувача в контексті
+            setCurrentUser(user); 
             setError("");
             setEmail("");
             setPassword("");
             setCopyPassword("");
-            navigate("/main"); // Перенаправляємо на головну сторінку після реєстрації
+            navigate("/main"); 
         } catch (error) {
             console.error(error);
             setError("Помилка при реєстрації!");
@@ -39,7 +39,7 @@ const SignUp = () => {
     };
 
     return (
-        <div className="signin-background"> {/* Додано клас для фону */}
+        <div className="signin-background">
             <div className="signin-container">
                 <form className="signin-form" onSubmit={register}>
                     <h2>Створення Акаунту</h2>

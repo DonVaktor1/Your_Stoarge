@@ -19,11 +19,11 @@ const SignIn = () => {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             console.log("User logged in:", user);
-            setCurrentUser(user); // Оновлюємо поточного користувача в контексті
+            setCurrentUser(user); 
             setError("");
             setEmail("");
             setPassword("");
-            navigate("/main"); // Перенаправляємо на основну сторінку
+            navigate("/main"); 
         } catch (error) {
             console.error("Login error:", error);
             setError("Акаунт не знайдено!");
@@ -32,7 +32,7 @@ const SignIn = () => {
     
 
     return (
-        <div className="signin-background"> {/* Додаємо контейнер фону */}
+        <div className="signin-background"> 
             <div className="signin-container">
                 <form className="signin-form" onSubmit={login}>
                     <h2>Вхід в акаунт</h2>
