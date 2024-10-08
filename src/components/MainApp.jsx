@@ -4,6 +4,9 @@ import { ref, set, push, onValue, remove } from "firebase/database";
 import { auth, database, storage } from '../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import printerIcon from '../assets/images/printer.png';
+import settingIcon from '../assets/images/setting.png';
+import plusIcon from '../assets/images/plus.png';
 
 const MainApp = () => {
     const [products, setProducts] = useState([]);
@@ -24,6 +27,11 @@ const MainApp = () => {
     const [userId, setUserId] = useState(null);
     const [errors, setErrors] = useState({});
     const [editErrors, setEditErrors] = useState({});
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    }
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -237,59 +245,86 @@ const MainApp = () => {
     };
 
     return (
-        <div className="main-container">
-            <div className="menu">
-                <button className="menu-button" onClick={() => setShowAddForm(true)}>Додати продукт</button>
-                <button className="menu-button" onClick={printProducts}>Друкувати таблицю</button>
-            </div>
+        <div className="app-container">
+            <div className={`sidebar ${isSidebarOpen ? '' : 'collapsed'}`}>
+            <button className="sidebar-button toggle-button" onClick={toggleSidebar}>
+            {isSidebarOpen ? '←' : '→'}
+                </button>
+                {isSidebarOpen && (
+                    <>
+                        <button className="sidebar-button" onClick={() => setShowAddForm(true)}>
+                            <img
+                            src={plusIcon}
+                            />
+                            Додати продукт</button>
 
-            <div className="filter-container">
-                <input
-                    type="text"
-                    placeholder="Пошук..."
-                    className="search-input"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                />
-                <select
-                    className="category-filter"
-                    value={selectedCategory}
-                    onChange={e => setSelectedCategory(e.target.value)}
-                >
-                    <option value="Всі">Всі</option>
-                    {Array.from(new Set(products.map(product => product.category))).map((category, index) => (
-                        <option key={index} value={category}>{category}</option>
-                    ))}
-                </select>
-                <button className="settings-button">Налаштування</button>
-            </div>
+                        <button className="sidebar-button" onClick={printProducts}>
+                         <img 
+                           src={printerIcon}
+                         />
+                            Друкувати 
+                        </button>
 
-            <table id="products-table" className="product-table">
-                <thead>
-                    <tr>
-                        <th>Назва</th>
-                        <th>Категорія</th>
-                        <th>Кількість</th>
-                        <th>Ціна</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredProducts.map(product => (
-                        <tr key={product.id} onClick={() => setSelectedProduct(product)}>
-                            <td>{product.name}</td>
-                            <td>{product.category}</td>
-                            <td>{product.quantity}</td>
-                            <td>{`${product.price} ${product.currency}`}</td>
+                        <div className="filter-group">
+                            <input
+                                type="text"
+                                placeholder="Пошук..."
+                                className="search-input"
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="filter-group">
+                            <select
+                                className="category-filter"
+                                value={selectedCategory}
+                                onChange={e => setSelectedCategory(e.target.value)}
+                            >
+                                <option value="Всі">Всі</option>
+                                {Array.from(new Set(products.map(product => product.category))).map((category, index) => (
+                                    <option key={index} value={category}>{category}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button className="sidebar-button">
+                        <img
+                           src = {settingIcon}
+                        />
+                        Налаштування</button>
+                    </>
+                )}
+                
+            </div>
+    
+            <div className={`main-content ${isSidebarOpen ? '' : 'expanded'}`}>
+                <table id="products-table" className="product-table">
+                    <thead>
+                        <tr>
+                            <th>Назва</th>
+                            <th>Категорія</th>
+                            <th>Кількість</th>
+                            <th>Ціна</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-
+                    </thead>
+                    <tbody>
+                        {filteredProducts.map(product => (
+                            <tr key={product.id} onClick={() => setSelectedProduct(product)}>
+                                <td>{product.name}</td>
+                                <td>{product.category}</td>
+                                <td>{product.quantity}</td>
+                                <td>{`${product.price} ${product.currency}`}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+    
             {showAddForm && (
                 <div className="product-details">
                     <div className="details-content">
                         <h2>Додати новий продукт</h2>
-
                         <div className="barcode-container">
                             <input
                                 type="text"
@@ -297,16 +332,11 @@ const MainApp = () => {
                                 value={newProduct.barcode}
                                 onChange={e => setNewProduct(prevState => ({ ...prevState, barcode: e.target.value }))}
                             />
-                            <button className="search-button">
-                                <svg className="barcode-icon" xmlns="http://www.w3.org/2000/svg" height="16" viewBox="0 0 24 24" width="16">
-                                    <path fill="#ffffff" d="M2 2h2v20H2V2zm4 0h2v20H6V2zm14 0h2v20h-2V2zm-4 0h2v20h-2V2zM10 2h2v20h-2V2zm4 0h2v20h-2V2z" />
-                                </svg>
-                                Шукати за штрих кодом
-                            </button>
+                            <button className="search-button">Шукати за штрих кодом</button>
                         </div>
 
                         {errors.barcode && <p className="error">{errors.barcode}</p>}
-
+    
                         <input
                             type="text"
                             placeholder="Назва продукту"
@@ -314,7 +344,7 @@ const MainApp = () => {
                             onChange={e => setNewProduct(prevState => ({ ...prevState, name: e.target.value }))}
                         />
                         {errors.name && <p className="error">{errors.name}</p>}
-
+    
                         <input
                             type="text"
                             placeholder="Категорія"
@@ -322,7 +352,7 @@ const MainApp = () => {
                             onChange={e => setNewProduct(prevState => ({ ...prevState, category: e.target.value }))}
                         />
                         {errors.category && <p className="error">{errors.category}</p>}
-
+    
                         <input
                             type="number"
                             placeholder="Кількість"
@@ -331,7 +361,7 @@ const MainApp = () => {
                             onChange={e => setNewProduct(prevState => ({ ...prevState, quantity: Math.max(1, parseInt(e.target.value)) }))}
                         />
                         {errors.quantity && <p className="error">{errors.quantity}</p>}
-
+    
                         <div className="price-container">
                             <input
                                 type="number"
@@ -351,7 +381,7 @@ const MainApp = () => {
                             </select>
                         </div>
                         {errors.price && <p className="error">{errors.price}</p>}
-
+    
                         <div className="image-upload-container" onClick={() => document.getElementById('imageUpload').click()}>
                             {productImage ? (
                                 <div className="image-preview">
@@ -361,9 +391,9 @@ const MainApp = () => {
                                 <p>Натисніть, щоб завантажити фото</p>
                             )}
                         </div>
-
+ 
                         {productImage && (
-                            <button className="clear-image-button" onClick={(e) => { 
+                            <button className="clear-image-button" onClick={e => { 
                                 e.stopPropagation(); 
                                 setProductImage(null); 
                                 document.getElementById('imageUpload').value = null; 
@@ -371,7 +401,7 @@ const MainApp = () => {
                                 Очистити фото
                             </button>
                         )}
-
+    
                         <input
                             type="file"
                             id="imageUpload"
@@ -379,24 +409,20 @@ const MainApp = () => {
                             onChange={handleImageUpload}
                             accept="image/*"
                         />
-
+    
                         <div className="agreement-container">
-                            <button className="cancel-button" onClick={() => {
-                                 setShowAddForm(false);
-                                 setProductImage(null); 
-                                 document.getElementById('imageUpload').value = null;
-                            }}>Скасувати</button>
+                            <button className="cancel-button" onClick={() => setShowAddForm(false)}>Скасувати</button>
                             <button className="add-button" onClick={addProduct}>Додати</button>
                         </div>
                     </div>
                 </div>
             )}
+    
             {selectedProduct && (
-    <div className="product-details">
-        <div className="details-content">
-            <h2>Редагувати продукт</h2>
-
-            <input
+                <div className="product-details">
+                    <div className="details-content">
+                        <h2>Редагувати продукт</h2>
+                        <input
                 type="text"
                 placeholder="Назва продукту"
                 value={selectedProduct.name}
@@ -488,7 +514,8 @@ const MainApp = () => {
             </div>
         </div>
     </div>
-)}      
+                 
+            )}
         </div>
     );
 };
