@@ -20,6 +20,7 @@ const MainApp = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [apiImageURL, setApiImageURL] = useState('');
     const [productImage, setProductImage] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [newProduct, setNewProduct] = useState({ 
         name: '', 
         category: '', 
@@ -35,15 +36,13 @@ const MainApp = () => {
             console.log('Запит штрих-коду:', barcode);
     
             const response = await fetch(`http://localhost:5000/api/barcode/${barcode}`);
-    
-            if (!response.ok) {
-                throw new Error('Помилка при отриманні даних з проксі-сервера');
-            }
+            if (!response.ok) throw new Error('Помилка при отриманні даних з проксі-сервера');
     
             const productInfo = await response.json();
             console.log('Відповідь API:', productInfo);
     
-            const imageURL = productInfo.products[0]?.images[0] || '';
+            const product = productInfo.products?.[0] || {};  
+            const imageURL = product.images?.[0] || '';
     
             console.log('Отримано URL зображення з API:', imageURL);
             setApiImageURL(imageURL); 
@@ -51,19 +50,18 @@ const MainApp = () => {
     
             setNewProduct((prevState) => ({
                 ...prevState,
-                name: productInfo.products[0]?.product_name || 'Без назви',
-                category: productInfo.products[0]?.category || 'Невідома категорія',
-                imageURL,  
-                manufacturer: productInfo.products[0]?.manufacturer || 'Невідомий виробник',
-                price: productInfo.products[0]?.stores[0]?.price 
-                    ? parseFloat(productInfo.products[0].stores[0].price) 
-                    : 0,
-                storeLink: productInfo.products[0]?.stores[0]?.link || '#'
+                name: product.product_name || 'Без назви',
+                category: product.category || 'Невідома категорія',
+                imageURL,
+                manufacturer: product.manufacturer || 'Невідомий виробник',
+                price: parseFloat(product.stores?.[0]?.price) || 0,
+                storeLink: product.stores?.[0]?.link || '#',
             }));
         } catch (error) {
             console.error('Помилка при виконанні запиту:', error);
         }
     };
+    
     
     
     const toggleSidebar = () => {
@@ -212,39 +210,36 @@ const MainApp = () => {
     };
     
 
-    const downloadImageToStorage = async (imageFile, productName, userId) => {
-        console.log('початок загрузки фото');
+    const downloadImageToStorage = async (imageSource, productName, userId) => {
+        console.log('початок завантаження фото');
+        setIsUploading(true);
+    
         try {
-            if (imageFile instanceof File) {
-                const blob = await imageFile.arrayBuffer();
-                const fileBlob = new Blob([blob], { type: imageFile.type });
-                const metadata = { contentType: imageFile.type };
+            let blob;
     
-                const imageRef = storageRef(storage, `users/${userId}/products/${productName}-${Date.now()}.jpg`);
-    
-                const uploadResult = await uploadBytes(imageRef, fileBlob, metadata);
-                
-                const downloadURL = await getDownloadURL(uploadResult.ref);
-                console.log('Отриманий URL зображення:', downloadURL);
-                
-                return downloadURL;
+            if (imageSource instanceof File) {
+                blob = new Blob([await imageSource.arrayBuffer()], { type: imageSource.type });
             } else {
-                const response = await fetch(`http://localhost:5000/api/proxy-image?url=${encodeURIComponent(imageFile)}`);
-                if (!response.ok) {
-                    throw new Error('Помилка при завантаженні зображення через проксі');
-                }
-    
-                const blob = await response.blob();
-                const imageRef = storageRef(storage, `users/${userId}/products/${productName}-${Date.now()}.jpg`);
-                const uploadResult = await uploadBytes(imageRef, blob);
-                const downloadURL = await getDownloadURL(uploadResult.ref);
-                return downloadURL;
+                const response = await fetch(`http://localhost:5000/api/proxy-image?url=${encodeURIComponent(imageSource)}`);
+                if (!response.ok) throw new Error('Помилка при завантаженні зображення через проксі');
+                blob = await response.blob();
             }
+    
+            const imageRef = storageRef(storage, `users/${userId}/products/${productName}-${Date.now()}.jpg`);
+            const uploadResult = await uploadBytes(imageRef, blob);
+            const downloadURL = await getDownloadURL(uploadResult.ref);
+    
+            console.log('Отриманий URL зображення:', downloadURL);
+            return downloadURL;
         } catch (error) {
             console.error('Помилка при завантаженні зображення в Firebase Storage:', error);
             throw error;
+        } finally {
+            setIsUploading(false);
         }
     };
+    
+    
     
     
     
@@ -278,61 +273,45 @@ const MainApp = () => {
         }
     };
     
-   
-
-
     const updateProduct = async () => {
-        if (userId && selectedProduct) {
-            const validationErrors = validateEditProduct(selectedProduct);
+        if (!userId || !selectedProduct) {
+            console.warn("Немає користувача або вибраного продукту.");
+            return;
+        }
     
-            if (Object.keys(validationErrors).length > 0) {
-                setEditErrors(validationErrors);
-                console.log("Validation errors:", validationErrors); 
-                return;
+        const validationErrors = validateEditProduct(selectedProduct);
+    
+        if (Object.keys(validationErrors).length > 0) {
+            setEditErrors(validationErrors);  
+            console.log("Validation errors:", validationErrors);
+            return;
+        }
+    
+        try {
+            setIsUploading(true);
+            let updatedImageURL = selectedProduct.imageURL;
+    
+            if (productImage) {
+                const imageRef = storageRef(storage, `users/${userId}/products/${selectedProduct.name}-${Date.now()}`);
+                const uploadResult = await uploadBytes(imageRef, productImage);
+                updatedImageURL = await getDownloadURL(uploadResult.ref);
             }
     
-            try {
-                let updatedImageURL = selectedProduct.imageURL;
-                console.log("Initial updatedImageURL:", updatedImageURL); 
+            const productRef = ref(database, `users/${userId}/products/${selectedProduct.id}`);
+            await set(productRef, { ...selectedProduct, imageURL: updatedImageURL });
     
-                if (productImage) {
-                    console.log("New productImage detected, proceeding with image handling."); 
-    
-                    if (selectedProduct.imageURL && selectedProduct.imageURL.startsWith('gs://')) {
-                        const oldImageRef = storageRef(storage, selectedProduct.imageURL);
-                        console.log("Attempting to delete old image at:", selectedProduct.imageURL);
-    
-                        await deleteObject(oldImageRef).catch((error) => {
-                            console.error("Помилка при видаленні старого зображення:", error);
-                        });
-                    } else {
-                        console.log("No valid old image URL found, skipping deletion."); 
-                    }
-    
-                    const imageRef = storageRef(storage, `users/${userId}/products/${selectedProduct.name}-${Date.now()}`);
-                    console.log("Uploading new image to:", imageRef.fullPath); 
-                    const uploadResult = await uploadBytes(imageRef, productImage);
-                    updatedImageURL = await getDownloadURL(uploadResult.ref);
-                    console.log("New image uploaded, updatedImageURL:", updatedImageURL); 
-                } else {
-                    console.log("No new productImage selected, keeping existing image URL."); 
-                }
-    
-                const productRef = ref(database, `users/${userId}/products/${selectedProduct.id}`);
-                console.log("Updating product in database at:", productRef.toString()); 
-                await set(productRef, { ...selectedProduct, imageURL: updatedImageURL });
-                console.log("Product updated successfully."); 
-    
-                setSelectedProduct(null);
-                setProductImage(null);
-                setEditErrors({});
-            } catch (error) {
-                console.error("Помилка при оновленні продукту:", error); 
-            }
-        } else {
-            console.warn("User ID or selected product is not available."); 
+            console.log("Product updated successfully.");
+            setSelectedProduct(null);
+            setProductImage(null);
+            setEditErrors({});
+        } catch (error) {
+            console.error("Помилка при оновленні продукту:", error);
+        } finally {
+            setIsUploading(false); 
         }
     };
+    
+
     
     
 
@@ -532,10 +511,11 @@ const MainApp = () => {
                         </div>
                         {errors.price && <p className="error">{errors.price}</p>}
                         <div 
-                            className="image-upload-container" 
-                            onClick={() => document.getElementById('imageUpload').click()}
-                        >
-                            {productImage ? (
+                        className="image-upload-container" 
+                        onClick={() => document.getElementById('imageUpload').click()}>
+                        {isUploading ? (  
+                            <div className="spinner"></div>
+                        ) : productImage ? (  
                             <div className="image-preview">
                                 <img 
                                     src={typeof productImage === 'string' ? productImage : URL.createObjectURL(productImage)} 
@@ -551,23 +531,19 @@ const MainApp = () => {
                                     className="product-image-preview" 
                                 />
                             </div>
-                        ) : (
+                        ) : (  
                             <p>Натисніть, щоб завантажити фото</p>
                         )}
+
                         <input 
                             type="file" 
                             id="imageUpload" 
                             style={{ display: 'none' }}  
                             onChange={handleImageUpload}
+                            accept="image/*"
                         />
                     </div>
-                        <input
-                            type="file"
-                            id="imageUpload"
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={handleImageUpload}
-                        />
+
  
                         {productImage && (
                             <button className="clear-image-button" onClick={e => { 
@@ -645,28 +621,40 @@ const MainApp = () => {
             {editErrors.price && <p className="error">{editErrors.price}</p>} 
 
             <div className="image-upload-container" onClick={() => document.getElementById('imageUpload').click()}>
-    {productImage ? (
-        <div className="image-preview">
-            <img 
-                src={typeof productImage === 'string' ? productImage : URL.createObjectURL(productImage)} 
-                alt="Product" 
-                className="product-image-preview" 
+            {isUploading ? ( 
+                <div className="spinner"></div>
+            ) : (
+                <>
+                    {productImage ? ( 
+                        <div className="image-preview">
+                            <img 
+                                src={typeof productImage === 'string' ? productImage : URL.createObjectURL(productImage)} 
+                                alt="Product" 
+                                className="product-image-preview" 
+                            />
+                        </div>
+                    ) : selectedProduct?.imageURL ? ( 
+                        <div className="image-preview">
+                            <img 
+                                src={selectedProduct.imageURL} 
+                                alt={selectedProduct.name} 
+                                className="product-image-preview" 
+                            />
+                        </div>
+                    ) : (  
+                        <p>Натисніть, щоб завантажити фото</p>
+                    )}
+                </>
+            )}
+
+            <input
+                type="file"
+                id="imageUpload"
+                style={{ display: 'none' }}
+                onChange={handleImageUpload}
+                accept="image/*"
             />
-                    </div>
-                ) : selectedProduct.imageURL ? (
-                    <div className="image-preview">
-                        <img 
-                            src={selectedProduct.imageURL} 
-                            alt={selectedProduct.name} 
-                            className="product-image-preview" 
-                        />
-                    </div>
-                ) : (
-                    <p>Натисніть, щоб завантажити фото</p>
-                )}
-            </div>
-
-
+        </div>
             {productImage && (
                 <button className="clear-image-button" onClick={e => { 
                     e.stopPropagation();

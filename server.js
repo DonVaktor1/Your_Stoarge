@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-const API_KEY = '15wecgrlfq1bt55dcoqkwjtsdvj6gg';
+const API_KEY = 'kd7602auom96mc3va381rrmtdpdhey';
 
 
 app.use(cors());
@@ -38,7 +38,9 @@ app.get('/api/barcode/:barcode', async (req, res) => {
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
-            throw new Error('Помилка при отриманні даних з Barcode Lookup API');
+            const errorResponse = await response.text(); // Отримати текст замість JSON
+            const errorMessage = errorResponse || 'Невідома помилка'; // Використовуємо текст відповіді
+            throw new Error(`Помилка при отриманні даних з Barcode Lookup API: ${errorMessage}`);
         }
 
         const productInfo = await response.json();
