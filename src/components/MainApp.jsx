@@ -128,40 +128,38 @@ const MainApp = () => {
     }, [productImage]);
     
  
-    const validateProduct = () => {
+    const validateProduct = useCallback(() => {
         let errors = {};
-        if (!newProduct.name.trim()) {
-            errors.name = "Назва продукту є обов'язковою.";
-        }
-        if (!newProduct.category.trim()) {
-            errors.category = "Категорія є обов'язковою.";
-        }
-        if (newProduct.quantity < 1) {
-            errors.quantity = "Кількість повинна бути більшою за 0.";
-        }
-        if (newProduct.price <= 0) {
-            errors.price = "Ціна повинна бути більшою за 0.";
-        }
+        if (!newProduct.name.trim()) errors.name = "Назва продукту є обов'язковою.";
+        if (!newProduct.category.trim()) errors.category = "Категорія є обов'язковою.";
+        if (newProduct.quantity < 1) errors.quantity = "Кількість повинна бути більшою за 0.";
+        if (newProduct.price <= 0) errors.price = "Ціна повинна бути більшою за 0.";
         return errors;
-    };
-
+    }, [newProduct]);
     
-    const validateEditProduct = (product) => {
+    const validateEditProduct = useCallback((product) => {
         let errors = {};
+    
         if (!product.name.trim()) {
             errors.name = "Назва продукту не може бути порожньою.";
         }
+    
         if (!product.category.trim()) {
             errors.category = "Категорія не може бути порожньою.";
         }
-        if (product.quantity < 1) {
-            errors.quantity = "Кількість повинна бути більшою за 0.";
+    
+        if (isNaN(product.quantity) || product.quantity < 1) {
+            errors.quantity = "Кількість повинна бути числом і більшою за 0.";
         }
-        if (product.price <= 0) {
-            errors.price = "Ціна повинна бути більшою за 0.";
+    
+        if (isNaN(product.price) || product.price <= 0) {
+            errors.price = "Ціна повинна бути числом і більшою за 0.";
         }
+    
         return errors;
-    };
+    }, []);
+    
+    
 
     const isBarcodeUnique = (barcode) => {
         return !products.some(product => product.barcode === barcode);
@@ -253,36 +251,26 @@ const MainApp = () => {
     const deleteProduct = async () => {
         if (userId && selectedProduct) {
             try {
-                // Перевіряємо, чи є шлях до зображення перед видаленням
                 if (selectedProduct.imageURL) {
-                    // Перевіряємо, чи URL зображення веде до Firebase Storage
                     const isFirebaseStorageURL = selectedProduct.imageURL.startsWith('gs://') || selectedProduct.imageURL.startsWith('https://firebasestorage.googleapis.com/');
     
                     if (isFirebaseStorageURL) {
-                        // Отримуємо посилання на зображення в Firebase Storage
                         const imageRef = storageRef(storage, selectedProduct.imageURL);
                         
-                        // Перевіряємо, чи зображення існує
                         await getDownloadURL(imageRef)
                             .then(async () => {
-                                // Якщо зображення існує, видаляємо його
                                 await deleteObject(imageRef);
                                 console.log("Зображення успішно видалено.");
                             })
                             .catch((error) => {
                                 console.error("Помилка при перевірці зображення:", error);
-                                // Якщо виникла помилка, просто пропустимо видалення зображення
                             });
                     } else {
                         console.log("URL не веде до Firebase Storage, зображення не буде видалено.");
                     }
                 }
-    
-                // Видалення продукту з бази даних
                 const productRef = ref(database, `users/${userId}/products/${selectedProduct.id}`);
                 await remove(productRef);
-    
-                // Скидання вибраного продукту
                 setSelectedProduct(null);
             } catch (error) {
                 console.error("Помилка при видаленні продукту:", error);
@@ -617,7 +605,7 @@ const MainApp = () => {
                 value={selectedProduct.name}
                 onChange={e => setSelectedProduct(prev => ({ ...prev, name: e.target.value }))}
             />
-            {editErrors.name && <p className="error">{editErrors.name}</p>}  
+            {editErrors.name && <p className="error">{editErrors.name}</p>}
 
             <input
                 type="text"
