@@ -31,7 +31,7 @@ const MainApp = () => {
         imageURL: '' 
     });
 
-    const fetchProductByBarcode = async (barcode) => 
+    const fetchProductByBarcode = async (barcode) => {
         try {
             console.log('Запит штрих-коду:', barcode);
     
