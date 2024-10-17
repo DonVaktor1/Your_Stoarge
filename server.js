@@ -38,8 +38,8 @@ app.get('/api/barcode/:barcode', async (req, res) => {
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
-            const errorResponse = await response.text(); // Отримати текст замість JSON
-            const errorMessage = errorResponse || 'Невідома помилка'; // Використовуємо текст відповіді
+            const errorResponse = await response.text(); 
+            const errorMessage = errorResponse || 'Невідома помилка'; 
             throw new Error(`Помилка при отриманні даних з Barcode Lookup API: ${errorMessage}`);
         }
 
