@@ -1,3 +1,12 @@
+import { TextEncoder, TextDecoder } from 'util';
+
+if (!global.TextEncoder) {
+  global.TextEncoder = TextEncoder;
+}
+if (!global.TextDecoder) {
+  global.TextDecoder = TextDecoder;
+}
+
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
