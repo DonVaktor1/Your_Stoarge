@@ -14,7 +14,7 @@ const SignUp = () => {
     const navigate = useNavigate();
 
     const register = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
         if (password !== copypassword) {
             setError("Паролі не збігаються!");
             setPassword("");
