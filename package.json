@@ -19,6 +19,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "cypress:run": "cypress run",
     "prepare": "husky install",
     "lint": "eslint .",
     "start-client": "react-scripts start",
@@ -44,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "cypress": "^13.15.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.1",
     "globals": "^15.11.0",
@@ -53,12 +55,12 @@
     "prettier": "^3.3.3"
   },
   "lint-staged": {
-  "**/*.{js,jsx,ts,tsx}": [
-    "eslint --fix",
-    "prettier --write"
-  ],
-  "**/*.{css,scss,md,json}": [
-    "prettier --write"
-  ]
-}
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{css,scss,md,json}": [
+      "prettier --write"
+    ]
+  }
 }
