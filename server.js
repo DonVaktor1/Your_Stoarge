@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-const API_KEY = 'kd7602auom96mc3va381rrmtdpdhey';
+const API_KEY = '15wecgrlfq1bt55dcoqkwjtsdvj6gg';
 
 
 app.use(cors());
