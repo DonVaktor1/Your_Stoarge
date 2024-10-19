@@ -4,6 +4,7 @@ import './App.css';
 import SignUp from './components/auth/SignUp.jsx';
 import SignIn from './components/auth/SignIn.jsx';
 import MainApp from './components/MainApp.jsx';
+import Settings from './components/Settings.jsx';
 import { AuthProvider } from './components/auth/AuthContext.js';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/main" element={<MainApp />} />
+            <Route path="/settings" element={<Settings/>} />
             <Route path="/" element={<Navigate to="/signin" replace />} />
           </Routes>
         </div>

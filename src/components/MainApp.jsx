@@ -4,11 +4,13 @@ import { ref, set, push, onValue, remove } from "firebase/database";
 import { auth, database, storage } from '../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { useNavigate } from 'react-router-dom';
 import printerIcon from '../assets/images/printer.png';
 import settingIcon from '../assets/images/setting.png';
 import plusIcon from '../assets/images/plus.png';
 
 const MainApp = () => {
+    const navigate = useNavigate(); 
     const [products, setProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Всі');
@@ -30,6 +32,44 @@ const MainApp = () => {
         barcode: '', 
         imageURL: '' 
     });
+    useEffect(() => {
+        console.log("useEffect запустився: перевірка аутентифікації та завантаження даних");
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userId = user.uid;
+                console.log(`Користувач авторизований: ${userId}`);
+                setUserId(userId);
+
+                const productsRef = ref(database, `users/${userId}/products`);
+
+                onValue(productsRef, (snapshot) => {
+                    const data = snapshot.val();
+                    const formattedProducts = data ? Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    })) : [];
+
+                    console.log('Отримані продукти:', formattedProducts);
+                    setProducts(formattedProducts);
+                });
+            } else {
+                console.log('Користувач не авторизований. Перенаправлення на сторінку входу.');
+                navigate('/signin');
+                setUserId(null);
+                setProducts([]); 
+            }
+        });
+
+        return () => {
+            console.log("useEffect очистка: відписуємося від onAuthStateChanged.");
+            unsubscribe();
+        };
+    }, [navigate]);
+
+    const goToSettings = () => {
+        navigate('/settings'); 
+    };
 
     const fetchProductByBarcode = async (barcode) => {
         try {
@@ -68,41 +108,7 @@ const MainApp = () => {
         setIsSidebarOpen(!isSidebarOpen);
     }
 
-    useEffect(() => {
-        console.log("useEffect запустився: перевірка аутентифікації");
     
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const userId = user.uid;
-                console.log(`Користувач авторизований: ${userId}`);
-                setUserId(userId);
-    
-                const productsRef = ref(database, `users/${userId}/products`);
-    
-                onValue(productsRef, (snapshot) => {
-                    const data = snapshot.val();
-                    const formattedProducts = data ? Object.keys(data).map(key => ({
-                        id: key,
-                        ...data[key]
-                    })) : [];
-    
-                    if (JSON.stringify(formattedProducts) !== JSON.stringify(products)) {
-                        console.log('Отримані продукти:', formattedProducts);
-                        setProducts(formattedProducts);
-                    }
-                });
-            } else {
-                console.log('Користувач не авторизований.');
-                setUserId(null);
-                setProducts([]);
-            }
-        });
-    
-        return () => {
-            console.log("useEffect очистка: відписуємося від onAuthStateChanged.");
-            unsubscribe();
-        };
-    }, [products])
     console.log('Компонент рендериться. Поточний стан:', { productImage, apiImageURL, selectedProduct });
 
     const filteredProducts = products.filter(product =>
@@ -411,7 +417,7 @@ const MainApp = () => {
                             </select>
                         </div>
 
-                        <button className="sidebar-button">
+                        <button className="sidebar-button" onClick={goToSettings}>
                         <img
                            src = {settingIcon}
                            alt="Налаштування" 
