@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import './Settings.css'; // Імпортуємо CSS
+import './Settings.css'; 
 
 const Settings = () => {
     const [user, setUser] = useState(null);

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MainApp.css';
 import { ref, set, push, onValue, remove } from "firebase/database";
-import { auth, database, storage } from '../firebase';
+import { auth, database, storage } from '../../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { useNavigate } from 'react-router-dom';
-import printerIcon from '../assets/images/printer.png';
-import settingIcon from '../assets/images/setting.png';
-import plusIcon from '../assets/images/plus.png';
+import printerIcon from '../../assets/images/printer.png';
+import settingIcon from '../../assets/images/setting.png';
+import plusIcon from '../../assets/images/plus.png';
 
 const MainApp = () => {
     const navigate = useNavigate(); 

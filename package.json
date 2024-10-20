@@ -62,13 +62,10 @@
     "**/*.{css,scss,md,json}": [
       "prettier --write"
     ]
-<<<<<<< Updated upstream
-=======
   },
   "jest": {
     "setupFiles": [
       "<rootDir>/setupTests.js"
     ]
->>>>>>> Stashed changes
   }
 }
