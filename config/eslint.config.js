@@ -1,7 +1,7 @@
 import globals from "globals";
 import pluginReact from "eslint-plugin-react";
 
-export default [
+const eslintConfig = [
   {
     files: ["**/*.{js,mjs,cjs,jsx}"],
     languageOptions: {
@@ -16,16 +16,18 @@ export default [
     },
     settings: {
       react: {
-        version: "detect",
+        version: "detect", // Автоматичне визначення версії React.
       },
     },
     plugins: {
       react: pluginReact, 
     },
     rules: {
-      "react/react-in-jsx-scope": "off", 
-      "react/prop-types": "off", 
-      "no-console": "off"
+      "react/react-in-jsx-scope": "off", // Вимкнення правила для React 17+.
+      "react/prop-types": "off", // Якщо не використовуються prop-types.
+      "no-console": "off", // Дозвіл на використання console.log.
     },
   },
 ];
+
+export default eslintConfig;
