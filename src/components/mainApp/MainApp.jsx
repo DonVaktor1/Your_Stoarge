@@ -417,7 +417,7 @@ const MainApp = () => {
                             </select>
                         </div>
 
-                        <button className="sidebar-button" onClick={goToSettings}>
+                        <button className="settings" onClick={goToSettings}>
                         <img
                            src = {settingIcon}
                            alt="Налаштування" 

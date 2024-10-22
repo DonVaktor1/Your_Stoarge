@@ -293,6 +293,7 @@
 }
 
   .sidebar-button,
+  .settings,
   .search-input,
   .category-filter,
   .clear-button {
@@ -459,4 +460,31 @@
     100% { transform: rotate(360deg); }
 }
 
+.settings {
+    width: 90%; 
+    margin-left: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings img {
+    width: 20px; 
+    height: 20px;
+    margin-right: 10px; 
+    vertical-align: middle; 
+  }
+
+  .settings span {
+    font-size: 16px; 
+    color: white; 
+  }
 
