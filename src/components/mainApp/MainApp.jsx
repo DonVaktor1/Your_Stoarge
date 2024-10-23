@@ -166,8 +166,17 @@ const MainApp = () => {
     
 
     const isBarcodeUnique = (barcode) => {
+        if (!isBarcodeValid(barcode)) {
+            return false;
+        }
+    
         return !products.some(product => product.barcode === barcode);
     };
+
+    const isBarcodeValid = (barcode) => {
+        return barcode.trim() !== '' && !isNaN(barcode) && isFinite(Number(barcode));
+    };
+    
 
     const addProduct = async () => {
         const validationErrors = validateProduct();
