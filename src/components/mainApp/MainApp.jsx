@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './MainApp.css';
-import { ref, set, push, onValue, remove } from "firebase/database";
+import { ref, set, push, onValue, remove,  } from "firebase/database";
 import { auth, database, storage } from '../../firebase';
 import { onAuthStateChanged } from "firebase/auth";
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
@@ -93,7 +93,6 @@ const MainApp = () => {
                 name: product.product_name || 'Без назви',
                 category: product.category || 'Невідома категорія',
                 imageURL,
-                manufacturer: product.manufacturer || 'Невідомий виробник',
                 price: parseFloat(product.stores?.[0]?.price) || 0,
                 storeLink: product.stores?.[0]?.link || '#',
             }));
@@ -180,16 +179,13 @@ const MainApp = () => {
 
     const addProduct = async () => {
         const validationErrors = validateProduct();
-        
         if (!isBarcodeUnique(newProduct.barcode)) {
             validationErrors.barcode = "Продукт з таким штрих-кодом вже існує.";
         }
-    
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
-    
         if (userId) {
             try {
                 let imageURL = '';  
@@ -201,14 +197,10 @@ const MainApp = () => {
                 } else if (apiImageURL) {
                     imageURL = apiImageURL; 
                 }
-                
-    
                 const productWithImage = { ...newProduct, imageURL };
                 const productsRef = ref(database, `users/${userId}/products`);
                 const newProductRef = push(productsRef);
                 await set(newProductRef, productWithImage);
-    
-               
                 resetForm();
             } catch (error) {
                 console.error("Помилка при додаванні продукту:", error);
@@ -255,9 +247,6 @@ const MainApp = () => {
     };
     
     
-    
-    
-    
     const deleteProduct = async () => {
         if (userId && selectedProduct) {
             try {
@@ -297,7 +286,7 @@ const MainApp = () => {
         const validationErrors = validateEditProduct(selectedProduct);
     
         if (Object.keys(validationErrors).length > 0) {
-            setEditErrors(validationErrors);  
+            setEditErrors(validationErrors);
             console.log("Validation errors:", validationErrors);
             return;
         }
@@ -306,23 +295,39 @@ const MainApp = () => {
             setIsUploading(true);
             let updatedImageURL = selectedProduct.imageURL;
     
+            // Якщо нове зображення вибране, видаляємо старе (якщо воно є)
             if (productImage) {
-                const imageRef = storageRef(storage, `users/${userId}/products/${selectedProduct.name}-${Date.now()}`);
-                const uploadResult = await uploadBytes(imageRef, productImage);
+                if (selectedProduct.imageURL) {
+                    try {
+                        const oldImageRef = storageRef(storage, selectedProduct.imageURL);
+                        await deleteObject(oldImageRef);
+                        console.log("Старе зображення видалено.");
+                    } catch (deleteError) {
+                        console.error("Не вдалося видалити старе зображення:", deleteError);
+                    }
+                }
+    
+                // Завантаження нового зображення
+                const newImageRef = storageRef(
+                    storage,
+                    `users/${userId}/products/${selectedProduct.name}-${Date.now()}`
+                );
+                const uploadResult = await uploadBytes(newImageRef, productImage);
                 updatedImageURL = await getDownloadURL(uploadResult.ref);
             }
     
+            // Оновлення даних продукту в базі даних
             const productRef = ref(database, `users/${userId}/products/${selectedProduct.id}`);
             await set(productRef, { ...selectedProduct, imageURL: updatedImageURL });
     
-            console.log("Product updated successfully.");
+            console.log("Продукт успішно оновлено.");
             setSelectedProduct(null);
             setProductImage(null);
             setEditErrors({});
         } catch (error) {
             console.error("Помилка при оновленні продукту:", error);
         } finally {
-            setIsUploading(false); 
+            setIsUploading(false);
         }
     };
     
