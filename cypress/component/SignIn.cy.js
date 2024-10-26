@@ -3,7 +3,7 @@ import React from 'react';
 import { mount } from 'cypress/react18';
 import SignIn from '../../src/components/auth/signIn/SignIn.jsx';
 import { AuthContext } from '../../src/components/auth/AuthContext.js';
-import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Route, Routes} from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
 describe('SignIn Component', () => {
