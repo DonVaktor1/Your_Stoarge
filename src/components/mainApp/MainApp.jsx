@@ -294,8 +294,7 @@ const MainApp = () => {
         try {
             setIsUploading(true);
             let updatedImageURL = selectedProduct.imageURL;
-    
-            // Якщо нове зображення вибране, видаляємо старе (якщо воно є)
+
             if (productImage) {
                 if (selectedProduct.imageURL) {
                     try {
@@ -306,8 +305,6 @@ const MainApp = () => {
                         console.error("Не вдалося видалити старе зображення:", deleteError);
                     }
                 }
-    
-                // Завантаження нового зображення
                 const newImageRef = storageRef(
                     storage,
                     `users/${userId}/products/${selectedProduct.name}-${Date.now()}`
@@ -315,8 +312,7 @@ const MainApp = () => {
                 const uploadResult = await uploadBytes(newImageRef, productImage);
                 updatedImageURL = await getDownloadURL(uploadResult.ref);
             }
-    
-            // Оновлення даних продукту в базі даних
+
             const productRef = ref(database, `users/${userId}/products/${selectedProduct.id}`);
             await set(productRef, { ...selectedProduct, imageURL: updatedImageURL });
     

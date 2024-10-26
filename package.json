@@ -20,6 +20,7 @@
   },
   "scripts": {
     "cypress:run": "cypress run",
+    "cypress:open:component": "cypress open --component",
     "prepare": "husky install",
     "lint": "eslint .",
     "start-client": "react-scripts start",
@@ -51,6 +52,8 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@cypress/react18": "^2.0.1",
+    "@cypress/webpack-dev-server": "^3.11.0",
     "cypress": "^13.15.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.1",
