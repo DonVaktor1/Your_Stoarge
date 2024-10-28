@@ -22,7 +22,6 @@
     "cypress:run": "cypress run",
     "cypress:open:component": "cypress open --component",
     "prepare": "husky install",
-    "lint": "eslint .",
     "start-client": "react-scripts start",
     "start-server": "nodemon server.js",
     "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
@@ -65,10 +64,6 @@
     "prettier": "^3.3.3"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
     "**/*.{css,scss,md,json}": [
       "prettier --write"
     ]
