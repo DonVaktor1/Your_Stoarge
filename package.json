@@ -26,7 +26,8 @@
     "start-client": "react-scripts start",
     "start-server": "nodemon server.js",
     "start": "concurrently \"npm run start-client\" \"npm run start-server\"",
-    "postinstall": "husky install"
+    "postinstall": "husky install",
+     "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
