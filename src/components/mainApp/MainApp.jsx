@@ -75,7 +75,7 @@ const MainApp = () => {
         try {
             console.log('Запит штрих-коду:', barcode);
     
-            const response = await fetch(`https://your-storage123.cloudfunctions.net/api/barcode/${barcode}`);
+            const response = await fetch(`http://localhost:5000/api/barcode/${barcode}`);
             if (!response.ok) throw new Error('Помилка при отриманні даних з проксі-сервера');
     
             const productInfo = await response.json();
@@ -227,7 +227,7 @@ const MainApp = () => {
             if (imageSource instanceof File) {
                 blob = new Blob([await imageSource.arrayBuffer()], { type: imageSource.type });
             } else {
-                const response = await fetch(`https://your-storage123.cloudfunctions.net/api/proxy-image?url=${encodeURIComponent(imageSource)}`);
+                const response = await fetch(`http://localhost:5000/api/proxy-image?url=${encodeURIComponent(imageSource)}`);
                 if (!response.ok) throw new Error('Помилка при завантаженні зображення через проксі');
                 blob = await response.blob();
             }

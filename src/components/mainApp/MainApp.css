@@ -1,3 +1,8 @@
+* {
+    outline: none;
+    user-select: none;
+}
+
 
 .details-content .button-container {
     display: flex;
@@ -6,6 +11,8 @@
 }
 
 .product-table {
+    outline: none;
+    user-select: none;
     border-collapse: collapse;
     width: calc(100% - 20px); 
     max-width: none; 

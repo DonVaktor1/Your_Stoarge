@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const API_KEY = '15wecgrlfq1bt55dcoqkwjtsdvj6gg';
+const API_KEY = 'kd7602auom96mc3va381rrmtdpdhey';
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
